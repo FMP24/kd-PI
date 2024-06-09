@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: wordpress-deployment
+  labels:
+    app: wordpress
+    type: frontend
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: wordpress
+      type: frontend
+  template:
+    metadata:
+      labels:
+        app: wordpress
+        type: frontend
+    spec:
+      containers:
+        - name: contenedor-wordpress
+          image: bitnami/wordpress:latest
+          ports:
+            - containerPort: 80
+              name: http-port
+          env:
+            - name: WORDPRESS_DB_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: db-cm
+                  key: dbhost
+            - name: WORDPRESS_DATABASE_USER
+              valueFrom:
+                configMapKeyRef:
+                  name: db-cm
+                  key: dbuser
+            - name: WORDPRESS_DATABASE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: db-pw
+                  key: dbpass
+            - name: WORDPRESS_DATABASE_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: db-cm
+                  key: dbname

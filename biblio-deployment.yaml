@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
         - name: contenedor-biblioteca
-          image: fmp24/biblioteca:v1_2
+          image: fmp24/biblioteca:v1
           ports:
             - containerPort: 80
               name: http-port

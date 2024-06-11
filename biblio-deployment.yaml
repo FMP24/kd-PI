@@ -19,11 +19,13 @@ spec:
     spec:
       containers:
         - name: contenedor-biblioteca
-          image: fmp24/biblioteca:v1
+          image: fmp24/biblioteca:v1_2
           ports:
             - containerPort: 80
               name: http-port
           env:
+            - name: BASE_URL
+              value: "http://www.franbiblio.org/"
             - name: DB_HOST
               valueFrom:
                 configMapKeyRef:

@@ -24,8 +24,6 @@ spec:
             - containerPort: 80
               name: http-port
           env:
-            - name: BASE_URL
-              value: "http://www.pifraniesgn.org/"
             - name: DB_HOST
               valueFrom:
                 configMapKeyRef:

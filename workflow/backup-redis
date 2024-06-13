@@ -1,0 +1,62 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: redis-restore-
+spec:
+  entrypoint: redis-restore
+  arguments:
+    parameters:
+      - name: backup-url
+        value: "*url*"
+  templates:
+    - name: redis-restore
+      steps:
+        - - name: download-backup
+            template: download-backup
+            arguments:
+              parameters:
+                - name: backup-url
+                  value: "{{workflow.parameters.backup-url}}"
+        - - name: restore-backup
+            template: restore-backup
+            arguments:
+              parameters:
+                - name: backup-file
+                  value: "~/redis-backup.rdb"
+
+    - name: download-backup
+      inputs:
+        parameters:
+          - name: backup-url
+      script:
+        image: curlimages/curl:latest
+        command: [sh]
+        source: |
+          curl -L "{{inputs.parameters.backup-url}}" -o ~/redis-backup.rdb
+          ls -l ~/
+      volumeMounts:
+        - name: pvc-temp
+          mountPath: ~/
+
+    - name: restore-backup
+      inputs:
+        parameters:
+          - name: backup-file
+      container:
+        image: redis:latest
+        command: [sh]
+        source: |
+          ls -l ~/
+          echo "nada"
+          redis-cli shutdown save
+          cp ~/redis-backup.rdb /data/dump.rdb
+          ls -l /data/
+          redis-server /usr/local/etc/redis/redis.conf
+      volumeMounts:
+        - name: pvc-temp
+          mountPath: ~/
+
+  volumes:
+    - name: pvc-temp
+      persistentVolumeClaim:
+        claimName: pvc-redis

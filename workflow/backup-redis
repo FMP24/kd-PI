@@ -22,39 +22,39 @@ spec:
             arguments:
               parameters:
                 - name: backup-file
-                  value: "~/redis-backup.rdb"
+                  value: "tmp/redis-backup.rdb"
 
     - name: download-backup
       inputs:
         parameters:
           - name: backup-url
       script:
-        image: curlimages/curl:latest
+        name: redis-restore
+        image: busybox
         command: [sh]
         source: |
-          curl -L "{{inputs.parameters.backup-url}}" -o ~/redis-backup.rdb
-          ls -l ~/
+          wget -O /tmp/redis-backup.rdb "{{inputs.parameters.backup-url}}"
+          ls -l tmp/
       volumeMounts:
-        - name: pvc-temp
-          mountPath: ~/
+        - name: pvc-redis-backup
+          mountPath: /tmp/
 
     - name: restore-backup
       inputs:
         parameters:
           - name: backup-file
-      container:
+      script:
         image: redis:latest
         command: [sh]
         source: |
-          ls -l ~/
-          echo "nada"
-          redis-cli shutdown save
-          cp ~/redis-backup.rdb /data/dump.rdb
+          cp tmp/redis-backup.rdb /data/dump.rdb
           ls -l /data/
-          redis-server /usr/local/etc/redis/redis.conf
+          redis-cli shutdown save
       volumeMounts:
+        - name: pvc-redis-backup
+          mountpath: /tmp/
         - name: pvc-temp
-          mountPath: ~/
+          mountPath: /data/
 
   volumes:
     - name: pvc-temp

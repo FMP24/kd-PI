@@ -22,7 +22,7 @@ spec:
           persistentVolumeClaim:
             claimName: pvc-redis
       containers:
-        - name: contenedor-redis
+        - name: redis
           image: redis
           command: ["redis-server"]
           args: ["--appendonly", "yes"]

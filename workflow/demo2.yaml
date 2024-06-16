@@ -1,0 +1,27 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: print-guestbook
+spec:
+  entrypoint: print-guestbook
+
+  volumes:
+  - name: workdir
+    persistentVolumeClaim:
+      claimName: pvc-redis
+
+  templates:
+  - name: print-guestbook
+    steps:
+    - - name: print
+        template: print-lista
+
+  - name: print-lista
+    script:
+      image: redis:latest
+      command: [sh]
+      source: |
+        redis-cli -h redis LRANGE lista 0 -1
+      volumeMounts:
+      - name: workdir
+        mountPath: /data/
